@@ -35,3 +35,20 @@ services:
       - default
     volumes:
       - ${CHATONS_ROOT_DIR:-/srv/chatons}/nextcloud/app:/var/www/html
+
+  pma:
+    image: phpmyadmin/phpmyadmin
+    env_file:
+      - .env
+    environment:
+      - MYSQL_USER=nextcloud
+      - PMA_HOSTS=db
+      - PMA_PORT=3306
+    labels:
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host: pma.${DOMAIN_NAME:-local}"
+      traefik.docker.network: "traefik"
+      traefik.backend: "cloudpma"
+    networks:
+      - traefik
+      - default
