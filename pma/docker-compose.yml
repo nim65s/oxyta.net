@@ -1,0 +1,20 @@
+version: '3'
+
+networks:
+  traefik:
+    external: true
+  cloud_default:
+    external: true
+
+services:
+  pma:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      - PMA_HOST=db
+    labels:
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host: pma.${DOMAIN_NAME:-local}"
+      traefik.docker.network: "traefik"
+    networks:
+      - traefik
+      - cloud_default
