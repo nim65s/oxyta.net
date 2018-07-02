@@ -1,0 +1,33 @@
+version: '3'
+
+networks:
+  proxytanet:
+    external: true
+
+services:
+  db:
+    image: postgres:10-alpine
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_USER=keycloak
+      - POSTGRES_DB=keycloak
+    volumes:
+      - ${CHATONS_ROOT_DIR:-/srv/chatons}/keycloak:/var/lib/postgresql/data
+
+  app:
+    image: jboss/keycloak
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - DB_VENDOR=postgres
+      - DB_ADDR=db
+    labels:
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host: keycloak.${CHATONS_DOMAIN:-local}, www.keycloak.${CHATONS_DOMAIN:-local}"
+      traefik.docker.network: "proxytanet"
+    networks:
+      - proxytanet
+      - default
