@@ -1,6 +1,6 @@
 FROM alpine
 
-ENV DOLI_VERSION 8.0.2
+ENV DOLI_VERSION 8.0.3
 
 RUN wget -q https://github.com/Dolibarr/dolibarr/archive/${DOLI_VERSION}.tar.gz \
  && tar xf ${DOLI_VERSION}.tar.gz \
