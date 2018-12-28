@@ -38,10 +38,25 @@ services:
     build:
       context: .
       args:
-        SYNAPSE_SERVER_NAME: ${CHATONS_SERVICE:-matrix}.${CHATONS_DOMAIN:-localhost}
         RIOT_VERSION: v0.17.8
+        CHATONS_SERVICE: ${CHATONS_SERVICE:-matrix}
+        CHATONS_DOMAIN: ${CHATONS_DOMAIN:-localhost}
+    restart: unless-stopped
     labels:
       traefik.enable: "true"
       traefik.frontend.rule: "Host: riot.${CHATONS_DOMAIN:-localhost}, www.riot.${CHATONS_DOMAIN:-localhost}"
     networks:
       - web
+
+  dimension:
+    image: turt2live/matrix-dimension
+    restart: unless-stopped
+    labels:
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host: dimension.${CHATONS_DOMAIN:-localhost}, www.dimension.${CHATONS_DOMAIN:-localhost}"
+    networks:
+      - web
+    ports:
+      - 8148:8148
+    volumes:
+      - ${CHATONS_ROOT_DIR:-/srv/chatons}/${CHATONS_SERVICE:-matrix}/dimension:/data
