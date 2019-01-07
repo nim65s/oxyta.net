@@ -1,0 +1,41 @@
+version: "3"
+
+networks:
+  web:
+    external: true
+
+services:
+  influxdb:
+    image: influxdb:alpine
+    restart: unless-stopped
+    volumes:
+      - ${CHATONS_ROOT_DIR:-/srv/chatons}/${CHATONS_SERVICE:-monitoring}/influxdb:/var/lib/influxdb
+
+  telegraf:
+    image: telegraf:alpine
+    restart: unless-stopped
+    environment:
+      - HOST_VAR=/host/var
+      - HOST_SYS=/host/sys
+      - HOST_ETC=/host/etc
+      - HOST_PROC=/host/proc
+    volumes:
+      - /var:/host/var:ro
+      - /run:/host/var/run:ro
+      - /sys:/host/sys:ro
+      - /sys:/host/etc:ro
+      - /proc:/host/proc:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./telegraf.conf:/etc/telegraf/telegraf.conf:ro
+
+  grafana:
+    image: grafana/grafana
+    restart: unless-stopped
+    labels:
+      traefik.enable: "true"
+      traefik.frontend.rule: "Host: ${CHATONS_SERVICE:-monitoring}.${CHATONS_DOMAIN:-localhost}, www.${CHATONS_SERVICE:-monitoring}.${CHATONS_DOMAIN:-localhost}"
+    networks:
+      - web
+      - default
+    volumes:
+      - ${CHATONS_ROOT_DIR:-/srv/chatons}/${CHATONS_SERVICE:-monitoring}/grafana:/var/lib/grafana
